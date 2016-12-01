@@ -7,7 +7,9 @@ table = {
 }
 
 def Resolve(opcode):
+    if not opcode:
+        return None
     try:
         return table[opcode]
-    except IndexError:
+    except KeyError:
         return "CNC_OP_UNKNOWN({})".format(opcode.decode('ascii'))
