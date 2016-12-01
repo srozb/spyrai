@@ -1,0 +1,16 @@
+#!/usr/bin/env python3
+
+from sys import argv, exit
+from agent import Agent
+
+def print_usage():
+    print("usage:")
+    print("{} [host] [port]".format(argv[0]))
+
+if __name__ == "__main__":
+    if len(argv) != 3:
+        print_usage()
+        exit(-1)
+    host, port = argv[1:]
+    spy = Agent(host, port)
+    spy.Spy()
