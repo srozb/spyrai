@@ -4,13 +4,13 @@ import opcodes
 import binascii
 import logging
 
-loglvl = logging.DEBUG
-
-logging.basicConfig(level=loglvl)
-l = logging.getLogger(__name__)
-fh = logging.FileHandler("spyrai.log")
-fh.setLevel(loglvl)
-l.addHandler(fh)
+def setupLogger(loglvl, loggerName):
+    logging.basicConfig(level=loglvl)
+    l = logging.getLogger(loggerName)
+    fh = logging.FileHandler("sp-{}.log".format(loggerName))
+    fh.setLevel(loglvl)
+    l.addHandler(fh)
+    return l
 
 def haxorview(buf):
     buf = binascii.hexlify(buf).decode('ascii')
@@ -20,15 +20,16 @@ class Agent():
     def __init__(self, host, port):
         self.host = host
         self.port = int(port)
+        self.l = setupLogger("DEBUG", "agent-{}-{}".format(self.host, self.port))
     def __ProcessReply(self, data):
         hex_data = haxorview(data)
-        l.debug("{} bytes recv: {}".format(len(data), hex_data))
+        self.l.debug("{} bytes recv: {}".format(len(data), hex_data))
         msg = opcodes.Resolve(data)
-        l.info("{}".format(msg))
+        self.l.info("{}".format(msg))
     def __SayHello(self):
         self.s.sendall(b'\x00\x00\x00\x01')
         self.s.sendall(b'\x00')
-        l.debug("Hello sent.")
+        self.l.debug("Hello sent.")
     def __Ping(self):
         self.s.sendall(b'\x00\x00')
     def __Recv(self):
@@ -36,7 +37,7 @@ class Agent():
     def Spy(self):
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as self.s:
             self.s.connect((self.host, self.port))
-            l.info("Connected to {}:{}".format(self.host, self.port))
+            self.l.info("Connected to {}:{}".format(self.host, self.port))
             self.__SayHello()
             while True:
                 self.__Ping()
