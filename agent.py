@@ -20,27 +20,37 @@ class Agent():
     def __init__(self, host, port):
         self.host = host
         self.port = int(port)
-        self.l = setupLogger("DEBUG", "agent-{}-{}".format(self.host, self.port))
+        self.l = setupLogger("INFO", "agent-{}-{}".format(self.host, self.port))
+        self.stats = {'ping': 0, 'pong': 0, 'commands': 0}
     def __ProcessReply(self, data):
         hex_data = haxorview(data)
         self.l.debug("{} bytes recv: {}".format(len(data), hex_data))
         msg = opcodes.Resolve(data)
-        self.l.info("{}".format(msg))
+        if msg == "CNC_OP_PING":
+            self.l.debug("{}".format(msg))
+            self.stats['pong'] += 1
+        else:
+            self.l.warning("GOT: {} - dump: {}".format(msg, hex_data))
+            self.stats['commands'] += 1
     def __SayHello(self):
         self.s.sendall(b'\x00\x00\x00\x01')
         self.s.sendall(b'\x00')
         self.l.debug("Hello sent.")
     def __Ping(self):
         self.s.sendall(b'\x00\x00')
+        self.stats['ping'] += 1
     def __Recv(self):
         return self.s.recv(1024)
     def Spy(self):
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as self.s:
             self.s.connect((self.host, self.port))
-            self.l.info("Connected to {}:{}".format(self.host, self.port))
+            self.l.info("Connected.")
             self.__SayHello()
             while True:
                 self.__Ping()
                 data = self.__Recv()
                 self.__ProcessReply(data)
                 time.sleep(10)
+                if not self.stats['ping'] % 100:
+                    self.l.info("STATS - ping:{ping}/{pong}, commands:{commands}\
+                        ".format(**self.stats))
