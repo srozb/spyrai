@@ -1,11 +1,13 @@
 import socket
 import time
 import opcodes
+import hexlify
 
 DEBUG = True
 
 def haxorview(buf):
-    return " ".join("{:02x}".format(ord(c)) for c in buf)
+    buf = binascii.hexlify(buf).decode('ascii')
+    return " ".join(buf[i:i+2] for i in range(0, len(buf), 2))
 
 class Agent():
     def __init__(self, host, port):
