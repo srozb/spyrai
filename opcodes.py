@@ -1,3 +1,5 @@
+from binascii import hexlify
+
 table = {
     b'\x00\x00': "CNC_OP_PING",
     b'\x10\x00': "CNC_OP_KILLSELF",
@@ -12,4 +14,5 @@ def Resolve(opcode):
     try:
         return table[opcode]
     except KeyError:
-        return "CNC_OP_UNKNOWN({})".format(opcode.decode('ascii'))
+        opcode = hexlify(opcode).decode("ascii").upper()
+        return "CNC_OP_UNKNOWN({})".format(opcode)
