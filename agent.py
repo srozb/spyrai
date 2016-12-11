@@ -26,17 +26,17 @@ class Agent():
     def __ProcessReply(self, data):
         hex_data = haxorview(data)
         self.l.debug("{} bytes recv: {}".format(len(data), hex_data))
-        if len(hex_data) < 4:
+        if len(data) < 4:
             self.l.debug("{}".format(msg))
             self.stats['pong'] += 1
         else:
             self.stats['commands'] += 1
             try:
                 msg = parser.Parse(data)
-                l.warning("GOT: {}".format(msg))
-                l.info("HEX DUMP:\n{}".format(hex_data))
+                self.l.warning("GOT: {}".format(msg))
+                self.l.info("HEX DUMP:\n{}".format(hex_data))
             except:
-                l.error("Unable to parse:\n{}".format(hex_data))
+                self.l.error("Unable to parse:\n{}".format(hex_data))
     def __SayHello(self):
         self.s.sendall(b'\x00\x00\x00\x01')
         self.s.sendall(b'\x00')
