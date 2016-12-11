@@ -1,9 +1,16 @@
 import socket
 import time
 import opcodes
-import hexlify
+import binascii
+import logging
 
-DEBUG = True
+loglvl = logging.DEBUG
+
+logging.basicConfig(level=loglvl)
+l = logging.getLogger(__name__)
+fh = logging.FileHandler("spyrai.log")
+fh.setLevel(loglvl)
+l.addHandler(fh)
 
 def haxorview(buf):
     buf = binascii.hexlify(buf).decode('ascii')
@@ -14,14 +21,14 @@ class Agent():
         self.host = host
         self.port = int(port)
     def __ProcessReply(self, data):
-        if DEBUG:
-            hex_data = haxorview(data.decode())
-            print("{} bytes recv: {}".format(len(data), hex_data))
+        hex_data = haxorview(data)
+        l.debug("{} bytes recv: {}".format(len(data), hex_data))
         msg = opcodes.Resolve(data)
-        print("{}".format(msg))
+        l.info("{}".format(msg))
     def __SayHello(self):
         self.s.sendall(b'\x00\x00\x00\x01')
         self.s.sendall(b'\x00')
+        l.debug("Hello sent.")
     def __Ping(self):
         self.s.sendall(b'\x00\x00')
     def __Recv(self):
@@ -29,6 +36,7 @@ class Agent():
     def Spy(self):
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as self.s:
             self.s.connect((self.host, self.port))
+            l.info("Connected to {}:{}".format(self.host, self.port))
             self.__SayHello()
             while True:
                 self.__Ping()
