@@ -25,9 +25,8 @@ class Agent():
         self.stats = {'ping': 0, 'pong': 0, 'commands': 0}
     def __ProcessReply(self, data):
         hex_data = haxorview(data)
-        self.l.debug("{} bytes recv: {}".format(len(data), hex_data))
+        self.l.debug("{} bytes recv, hexdump:\n{}".format(len(data), hex_data))
         if len(data) < 4:
-            self.l.debug("{}".format(msg))
             self.stats['pong'] += 1
         else:
             self.stats['commands'] += 1
