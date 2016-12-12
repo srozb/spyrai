@@ -1,5 +1,6 @@
 from struct import unpack
 from netaddr import IPAddress
+from collections import namedtuple
 
 ATK_VEC = {
     0:  "UDP",
@@ -15,14 +16,48 @@ ATK_VEC = {
     10: "HTTP",
 }
 
+#Prepare structures
+Target = namedtuple("Target", "IP mask")
+Opts = namedtuple("Options", "var val_len val")
+Message = namedtuple("Message", "duration atk_vec targets opts")
+
+def _RemoveLeadingBytesIfNeeded(buf):
+    if len(buf) == unpack(">H", buf[2:4])[0] + 2:
+        #need to remove 2 leading bytes - probably ping reply
+        return buf[2:]
+    elif len(buf) != unpack(">H", buf[0:2])[0]:
+        #reported len != recv len so give up.
+        raise Exception("couldn't determine message length.")
+    #no need to do anything.
+    return buf
+
+def _ParseTargets(buf):
+    targets = []
+    targets_len = buf[0]
+    buf = buf[1:]
+    for i in range(targets_len):
+        ip = str(IPAddress((unpack(">I", buf[:4]))[0]))
+        mask = buf[4]
+        targets.append(Target(ip, mask))
+        buf = buf[5:]
+    return targets
+
+def _ParseOpts(buf):
+    opts = []
+    opts_len = buf[0]
+    buf = buf[1:]
+    for i in range(opts_len):
+        var = buf[0]
+        val_len = buf[1]
+        val = str(buf[2:2+val_len])
+        opts.append(Opts(var, val_len, val))
+        buf = buf[2+val_len:]
+    return opts
+
 def Parse(buf):
-    #duration, unkb1, unkb2, unkint1 = unpack("<IBBI", buf[:6])
-    duration = unpack(">I", buf[4:8])[0]
-    atk_vec = ATK_VEC[buf[8]]
-    t_count = buf[9]
-    t_ip = str(IPAddress((unpack(">I", buf[10:14]))[0]))
-    t_mask = buf[14]
-    return "DURATION: {}s, ATK_VEC_{}, target count: {}, target: {}/{}".format(
-        duration, atk_vec, t_count, t_ip, t_mask)
-    #print(duration, attack_id, attack_count)
-    raise Exception("Unimplemented")
+    buf = _RemoveLeadingBytesIfNeeded(buf)
+    duration = unpack(">I", buf[2:6])[0]
+    atk_vec = ATK_VEC[buf[6]]
+    targets = _ParseTargets(buf[7:])
+    options = _ParseOpts(buf[8+5*len(targets):])
+    return Message(duration, atk_vec, targets, options)

@@ -31,9 +31,13 @@ class Agent():
         else:
             self.stats['commands'] += 1
             try:
-                msg = parser.Parse(data)
-                self.l.warning("GOT: {}".format(msg))
-                self.l.info("HEX DUMP:\n{}".format(hex_data))
+                m = parser.Parse(data)
+                self.l.debug("Parsed message: {}".format(str(m)))
+                self.l.warning("ATK_VEC_{atk_vec} for {duration} seconds".format(**m))
+                for t in m.targets:
+                    self.warning("TARGET: {IP}/{mask}".format(**t))
+                for o in m.options:
+                    self.warining("OPTIONS: {var} {val}".format(**o))
             except:
                 self.l.error("Unable to parse:\n{}".format(hex_data))
     def __SayHello(self):
@@ -45,16 +49,18 @@ class Agent():
         self.stats['ping'] += 1
     def __Recv(self):
         return self.s.recv(1024)
+    def __Communicate(self):
+        self.__Ping()
+        data = self.__Recv()
+        self.__ProcessReply(data)
+        time.sleep(10)
+        if not self.stats['ping'] % 100:
+            self.l.info("STATS - ping:{ping}/{pong}, commands:{commands}\
+                ".format(**self.stats))
     def Spy(self):
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as self.s:
             self.s.connect((self.host, self.port))
             self.l.info("Connected.")
             self.__SayHello()
             while True:
-                self.__Ping()
-                data = self.__Recv()
-                self.__ProcessReply(data)
-                time.sleep(10)
-                if not self.stats['ping'] % 100:
-                    self.l.info("STATS - ping:{ping}/{pong}, commands:{commands}\
-                        ".format(**self.stats))
+                self.__Communicate()

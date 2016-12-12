@@ -13,4 +13,11 @@ if __name__ == "__main__":
         exit(-1)
     host, port = argv[1:]
     spy = Agent(host, port)
-    spy.Spy()
+    try:
+        spy.Spy()
+    except ConnectionResetError:
+        print("Connection Reset.")
+        exit(-2)
+    except KeyboardInterrupt:
+        print("Goodbye.")
+        exit(0)
