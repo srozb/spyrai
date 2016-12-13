@@ -2,19 +2,13 @@ from struct import unpack
 from netaddr import IPAddress
 from collections import namedtuple
 
-ATK_VEC = {
-    0:  "UDP",
-    1:  "VSE",
-    2:  "DNS",
-    3:  "SYN",
-    4:  "ACK",
-    5:  "STOMP",
-    6:  "GREIP",
-    7:  "GREETH",
-    8:  "PROXY",
-    9:  "UDP_PLAIN",
-    10: "HTTP",
-}
+ATK_VEC = ["UDP", "VSE", "DNS", "SYN", "ACK", "STOMP", "GREIP", "GREETH",
+"PROXY", "UDP_PLAIN", "HTTP"]
+
+ATK_OPT = ["PAYLOAD_SIZE", "PAYLOAD_RAND", "IP_TOS", "IP_IDENT", "IP_TTL",
+"IP_DF", "SPORT", "DPORT", "DOMAIN", "DNS_HDR_ID", "TCPCC", "URG", "ACK", "PSH",
+"RST", "SYN", "FIN", "SEQRND", "ACKRND", "GRE_CONSTIP", "METHOD", "POST_DATA",
+"PATH", "HTTPS", "CONNS", "SOURCE"]
 
 #Prepare structures
 Target = namedtuple("Target", "IP mask")
@@ -47,7 +41,10 @@ def _ParseOpts(buf):
     opts_len = buf[0]
     buf = buf[1:]
     for i in range(opts_len):
-        var = buf[0]
+        try:
+            var = ATK_OPT[buf[0]]
+        except IndexError:
+            var = buf[0]
         val_len = buf[1]
         val = str(buf[2:2+val_len])
         opts.append(Opts(var, val_len, val))
