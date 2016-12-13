@@ -33,11 +33,11 @@ class Agent():
             try:
                 m = parser.Parse(data)
                 self.l.debug("Parsed message: {}".format(str(m)))
-                self.l.warning("ATK_VEC_{atk_vec} for {duration} seconds".format(**m))
+                self.l.warning("ATK_VEC_{atk_vec} for {duration} seconds".format(**m._asdict()))
                 for t in m.targets:
-                    self.warning("TARGET: {IP}/{mask}".format(**t))
+                    self.warning("TARGET: {IP}/{mask}".format(**t._asdict()))
                 for o in m.options:
-                    self.warining("OPTIONS: {var} {val}".format(**o))
+                    self.warining("OPTIONS: {var} {val}".format(**o._asdict()))
             except:
                 self.l.error("Unable to parse:\n{}".format(hex_data))
     def __SayHello(self):
