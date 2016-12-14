@@ -46,7 +46,10 @@ def _ParseOpts(buf):
         except IndexError:
             var = buf[0]
         val_len = buf[1]
-        val = str(buf[2:2+val_len])
+        try:
+            val = buf[2:2+val_len].decode('ascii')
+        except:
+            val = str(buf[2:2+val_len])
         opts.append(Opts(var, val_len, val))
         buf = buf[2+val_len:]
     return opts
