@@ -1,6 +1,5 @@
 import socket
 import time
-#import opcodes
 import binascii
 import logging
 import parser

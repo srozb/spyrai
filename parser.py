@@ -13,7 +13,7 @@ ATK_OPT = ["PAYLOAD_SIZE", "PAYLOAD_RAND", "IP_TOS", "IP_IDENT", "IP_TTL",
 #Prepare structures
 Target = namedtuple("Target", "IP mask")
 Opts = namedtuple("Options", "var val_len val")
-Message = namedtuple("Message", "duration atk_vec targets opts")
+Message = namedtuple("Message", "duration atk_vec targets options")
 
 def _RemoveLeadingBytesIfNeeded(buf):
     if len(buf) == unpack(">H", buf[2:4])[0] + 2:

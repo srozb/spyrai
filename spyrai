@@ -20,4 +20,6 @@ if __name__ == "__main__":
         exit(-2)
     except KeyboardInterrupt:
         print("Goodbye.")
+        print("stats: {commands} commands and {pong} pongs received.".format(
+            **spy.stats))
         exit(0)
