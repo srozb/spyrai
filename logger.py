@@ -5,13 +5,14 @@ from os import mkdir
 
 class Logger():
 
-    def __init__(self, mod_name):
+    def __init__(self, mod_name, to_file=True):
         self._CreateLogDir()
         self.mod_name = mod_name
         self.logger = logging.getLogger(mod_name)
         self.logger.setLevel(config.log_level)
         self.logger.addHandler(self._GetConsoleHandler())
-        self.logger.addHandler(self._GetFileHandler())
+        if to_file:
+            self.logger.addHandler(self._GetFileHandler())
 
     def _CreateLogDir(self):
         try:

@@ -3,6 +3,7 @@
 from sys import argv, exit
 from agent import Agent
 from logger import Logger
+import config
 
 
 def print_usage():
@@ -11,7 +12,7 @@ def print_usage():
     print("{} [host] [port]".format(argv[0]))
 
 def main():
-    l = Logger("main")
+    l = Logger("main", to_file=config.console_to_file)
     if len(argv) != 3:
         print_usage()
         exit(-1)

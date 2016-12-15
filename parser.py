@@ -2,6 +2,7 @@ from struct import unpack
 from netaddr import IPAddress
 from collections import namedtuple
 
+
 ATK_VEC = ["UDP", "VSE", "DNS", "SYN", "ACK", "STOMP", "GREIP", "GREETH",
 "PROXY", "UDP_PLAIN", "HTTP"]
 
