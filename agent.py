@@ -1,16 +1,30 @@
 import socket
 import time
 import parser
+import config
 from logger import Logger
 from utils import haxorview
+from retrying import retry
 
 
 class Agent():
     def __init__(self, host, port):
         self.host = host
         self.port = int(port)
+        self.socket = None
         self.l = Logger("{}-{}_{}".format(__name__, host, port))
         self.stats = {'ping': 0, 'pong': 0, 'commands': 0}
+    def __SetupSocket(self):
+        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    def __ResetSocket(self):
+        self.l.debug("Socket reset.")
+        self.socket.close()
+        self.__SetupSocket()
+    @retry(wait_exponential_multiplier=1000, wait_exponential_max=600000)
+    def __Connect(self):
+        self.l.debug("about to connect to {}:{}".format(self.host, self.port))
+        self.__SetupSocket()
+        self.socket.connect((self.host, self.port))
     def __ProcessReply(self, data):
         hex_data = haxorview(data)
         self.l.debug("{} bytes recv, hexdump:\n{}".format(len(data), hex_data))
@@ -30,26 +44,26 @@ class Agent():
             except:
                 self.l.error("Unable to parse:\n{}".format(hex_data))
     def __SayHello(self):
-        self.s.sendall(b'\x00\x00\x00\x01')
-        self.s.sendall(b'\x00')
+        self.socket.sendall(b'\x00\x00\x00\x01')
+        self.socket.sendall(b'\x00')
         self.l.debug("Hello sent.")
     def __Ping(self):
-        self.s.sendall(b'\x00\x00')
+        self.socket.sendall(b'\x00\x00')
         self.stats['ping'] += 1
     def __Recv(self):
-        return self.s.recv(1024)
+        return self.socket.recv(1024)
     def __Communicate(self):
         self.__Ping()
         data = self.__Recv()
         self.__ProcessReply(data)
-        time.sleep(10)
+        time.sleep(config.ping_interval)
         if not self.stats['ping'] % 100:
             self.l.info("STATS - ping:{ping}/{pong}, commands:{commands}\
                 ".format(**self.stats))
+    def __DoSpy(self):
+        self.__SayHello()
+        while True:
+            self.__Communicate()
     def Spy(self):
-        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as self.s:
-            self.s.connect((self.host, self.port))
-            self.l.info("Connected.")
-            self.__SayHello()
-            while True:
-                self.__Communicate()
+        self.__Connect()
+        self.__DoSpy()

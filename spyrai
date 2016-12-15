@@ -16,7 +16,7 @@ def main():
         print_usage()
         exit(-1)
     host, port = argv[1:]
-    l.warn("Spyrai started. Connecting to {}:{}".format(host, port))
+    l.warn("Spyrai started.")
     spy = Agent(host, port)
     try:
         spy.Spy()
