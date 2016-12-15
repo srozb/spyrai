@@ -1,26 +1,15 @@
 import socket
 import time
-import binascii
-import logging
 import parser
+from logger import Logger
+from utils import haxorview
 
-def setupLogger(loglvl, loggerName):
-    logging.basicConfig(level=loglvl)
-    l = logging.getLogger(loggerName)
-    fh = logging.FileHandler("sp-{}.log".format(loggerName))
-    fh.setLevel(loglvl)
-    l.addHandler(fh)
-    return l
-
-def haxorview(buf):
-    buf = binascii.hexlify(buf).decode('ascii')
-    return " ".join(buf[i:i+2] for i in range(0, len(buf), 2))
 
 class Agent():
     def __init__(self, host, port):
         self.host = host
         self.port = int(port)
-        self.l = setupLogger("INFO", "agent-{}-{}".format(self.host, self.port))
+        self.l = Logger("{}-{}_{}".format(__name__, host, port))
         self.stats = {'ping': 0, 'pong': 0, 'commands': 0}
     def __ProcessReply(self, data):
         hex_data = haxorview(data)
@@ -32,11 +21,12 @@ class Agent():
             try:
                 m = parser.Parse(data)
                 self.l.debug("Parsed message: {}".format(str(m)))
-                self.l.warning("ATK_VEC_{atk_vec} for {duration} seconds".format(**m._asdict()))
+                self.l.warn("ATK_VEC_{atk_vec} for {duration} seconds\
+                    ".format(**m._asdict()))
                 for t in m.targets:
-                    self.l.warning("TARGET: {IP}/{mask}".format(**t._asdict()))
+                    self.l.warn("TARGET: {IP}/{mask}".format(**t._asdict()))
                 for o in m.options:
-                    self.l.warning("OPTIONS: {var}={val}".format(**o._asdict()))
+                    self.l.warn("OPTIONS: {var}={val}".format(**o._asdict()))
             except:
                 self.l.error("Unable to parse:\n{}".format(hex_data))
     def __SayHello(self):

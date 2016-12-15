@@ -2,24 +2,34 @@
 
 from sys import argv, exit
 from agent import Agent
+from logger import Logger
+
 
 def print_usage():
+    print("Spyrai - a mirai C2 client")
     print("usage:")
     print("{} [host] [port]".format(argv[0]))
 
-if __name__ == "__main__":
+def main():
+    l = Logger("main")
     if len(argv) != 3:
         print_usage()
         exit(-1)
     host, port = argv[1:]
+    l.warn("Spyrai started. Connecting to {}:{}".format(host, port))
     spy = Agent(host, port)
     try:
         spy.Spy()
     except ConnectionResetError:
-        print("Connection Reset.")
+        l.error("Connection Reset.")
         exit(-2)
+    except ConnectionRefusedError:
+        l.error("Server refused our connection.")
     except KeyboardInterrupt:
-        print("Goodbye.")
-        print("stats: {commands} commands and {pong} pongs received.".format(
+        l.info("Goodbye.")
+        l.info("stats: {commands} commands and {pong} pongs received.".format(
             **spy.stats))
         exit(0)
+
+if __name__ == "__main__":
+        main()
