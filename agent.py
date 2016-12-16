@@ -68,8 +68,8 @@ class Agent():
         self.__ProcessReply(data)
         time.sleep(config.ping_interval)
         if not self.stats['ping'] % 100:
-            self.l.info("STATS - ping:{ping}/{pong}, commands:{commands}, \
-                reconnects:{conn_fails}".format(**self.stats))
+            self.l.info("STATS - ping:{ping}/{pong}, cmds:{commands}, \
+reconn:{conn_fails}".format(**self.stats))
 
     def __DoSpy(self):
         self.__SayHello()
