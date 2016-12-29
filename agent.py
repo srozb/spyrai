@@ -41,12 +41,12 @@ class Agent():
             try:
                 m = parser.Parse(data)
                 self.l.debug("Parsed message: {}".format(str(m)))
-                self.l.warn("ATK_VEC_{atk_vec} for {duration} seconds\
-                    ".format(**m._asdict()))
+                self.l.warn("ATK_VEC_{m.atk_vec} for {m.duration} seconds"\
+                    .format(m=m))
                 for t in m.targets:
-                    self.l.warn("TARGET: {IP}/{mask}".format(**t._asdict()))
+                    self.l.warn("TARGET: {t.IP}/{t.mask}".format(t=t))
                 for o in m.options:
-                    self.l.warn("OPTIONS: {var}={val}".format(**o._asdict()))
+                    self.l.warn("OPTIONS: {o.var}={o.val}".format(o=o))
             except:
                 self.l.error("Unable to parse:\n{}".format(hex_data))
 
@@ -68,8 +68,7 @@ class Agent():
         self.__ProcessReply(data)
         time.sleep(config.ping_interval)
         if not self.stats['ping'] % 100:
-            self.l.info("STATS - ping:{ping}/{pong}, cmds:{commands}, \
-reconn:{conn_fails}".format(**self.stats))
+            self.l.info("STATS - ping:{ping}/{pong}, cmds:{commands}, reconn:{conn_fails}".format(**self.stats))
 
     def __DoSpy(self):
         self.__SayHello()
